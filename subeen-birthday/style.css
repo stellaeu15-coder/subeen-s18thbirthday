@@ -1,0 +1,283 @@
+/* ==========================
+   Notecard-stack — Styles
+   (replaces old single-page book CSS)
+   ========================== */
+
+/* Theme / sizing */
+:root{
+  --bg: #ffe6f2;
+  --soft: #f8e1e6;
+  --accent: #ff4f8b;
+  --card-max: 700px;
+}
+
+/* Body & screens */
+body {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background: var(--soft);
+  color: #3a3a3a;
+}
+
+.page-screen {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  background: var(--bg);
+}
+
+/* Utility classes */
+.hidden { display: none !important; }
+.show { display: block !important; }
+.invisible { visibility: hidden !important; }
+
+/* Headings and text */
+h1 {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.subtext {
+  font-size: 1rem;
+  color: #7a7a7a;
+  margin: 15px 0;
+}
+
+/* Buttons (keeps your original palette) */
+#start-btn, .choice-buttons button, #back-btn {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  margin: 6px;
+}
+
+/* Specific button colors */
+#start-btn { background: var(--accent); color: #fff; }
+#start-btn:hover { background: #ff2a73; }
+
+.choice-buttons button:first-child { background: #7bd389; color:#fff; }
+.choice-buttons button:first-child:hover { background:#5fc56d; }
+
+.choice-buttons button:last-child { background: #d38989; color:#fff; }
+.choice-buttons button:last-child:hover { background:#b86565; }
+
+#back-btn { background: #e367f1; color:#fff; }
+#back-btn:hover { background:#ff30ea; }
+
+/* Cover-image used on the "Do you want to open it?" screen */
+.cover-img {
+  width: 400px;
+  max-width: 90%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* --------------------------
+   Notecard stack + main card
+   -------------------------- */
+
+/* container that centers the notecard stack & main card */
+.book-container {
+  position: relative;
+  width: 80%;
+  max-width: var(--card-max);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0;
+}
+
+/* notecards behind — stacked visuals (non-interactive) */
+#notecard-stack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;   /* do not block clicks on main card */
+  z-index: 1;
+}
+
+#notecard-stack img.notecard {
+  position: absolute;
+  width: 100%;
+  max-width: var(--card-max);
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  transform-origin: center;
+  transition: transform 400ms ease, opacity 300ms ease;
+  opacity: 0.98;
+}
+
+/* subtle offsets to look like a stacked pile */
+#notecard-stack img.notecard:nth-child(1) { transform: translate(-8px,-6px) rotate(-1.6deg) scale(0.994); z-index:1; }
+#notecard-stack img.notecard:nth-child(2) { transform: translate(0px,0px) rotate(0.4deg) scale(0.996); z-index:2; }
+#notecard-stack img.notecard:nth-child(3) { transform: translate(8px,6px) rotate(1.2deg) scale(0.998); z-index:3; }
+
+/* active visible page (the one user interacts with) */
+#main-card {
+  position: relative;
+  width: 100%;
+  max-width: var(--card-max);
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  background: white;
+  z-index: 10;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 420ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease;
+  display: block;
+}
+
+/* slight hover lift */
+#main-card:hover { transform: translateY(-6px); }
+
+/* swipe animations used by JS */
+.swipe-left {
+  transform: translateX(-120%) rotate(-12deg) scale(0.95) !important;
+  opacity: 0 !important;
+}
+
+.swipe-right {
+  transform: translateX(120%) rotate(12deg) scale(0.95) !important;
+  opacity: 0 !important;
+}
+
+/* controls under the card */
+.controls {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 12;
+}
+
+.controls button {
+  background: #ffb5c2;
+  color: #3a3a3a;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.98rem;
+  cursor: pointer;
+}
+.controls button:hover { background: #ff8fa3; }
+
+/* responsive tweaks */
+@media (max-width: 480px) {
+  h1 { font-size: 1.4rem; }
+  .cover-img { width: 260px; }
+  :root { --card-max: 340px; }
+  .book-container { padding: 16px 0; }
+}
+
+/* small helper if you want to temporarily hide the notecard stack visually */
+.notecard-hidden #notecard-stack img.notecard { opacity: 0; transform: scale(0.98) translateY(6px); }
+
+/* Notecard stack background */
+.page-stack {
+  position: absolute;
+  width: 80%;
+  max-width: 700px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0; /* stay behind */
+}
+
+.page-behind {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  opacity: 0.8;
+}
+
+/* Cover + first page always above stack */
+#book-cover,
+#first-page {
+  position: relative;
+  z-index: 1;
+}
+
+/* Navigation buttons below notecards */
+.nav-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.nav-buttons button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #ff4f8b;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.nav-buttons button:hover {
+  background: #ff2a73;
+}
+
+.balloon {
+  position: absolute;
+  bottom: 0;
+  width: 30px;
+  height: 40px;
+  border-radius: 50% 50% 50% 50%;
+  opacity: 0.9;
+  animation: floatUp 3s forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-300px) scale(1.2); opacity: 0; }
+}
+
+/* CD player on top of page */
+#music-cd {
+  position: absolute;
+  width: 120px;       /* larger size */
+  height: 120px;
+  object-fit: contain;
+  cursor: pointer;
+  bottom: 20px;       /* distance from bottom of card */
+  right: 100px;        /* distance from right of card */
+  z-index: 30;        /* higher than #main-card */
+  display: none;      /* only show on third page */
+}
+
+#purple-envelope {
+  position: absolute;
+  top: 50%; /* adjust to where you want it */
+  left: 50%; /* adjust to where you want it */
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 10; /* this makes sure it goes above 15page.png */
+}
+
+#page15 {
+  position: relative;
+  z-index: 1;
+}

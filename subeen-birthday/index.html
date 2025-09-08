@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Subeen's Birthday — Notecard Stack</title>
+<style>
+:root {
+  --bg: #ffe6f2;
+  --soft: #f8e1e6;
+  --card-max: 700px;
+}
+body {
+  margin: 0;
+  font-family: "Georgia", serif;
+  background: var(--soft);
+  color: #3a3a3a;
+}
+.page-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  background: var(--bg);
+}
+.hidden { display: none; }
+h1 { font-size: 1.9rem; color: #ff4f8b; margin: 0 0 8px; }
+.subtext { color: #7a7a7a; margin: 8px 0 18px; }
+button {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+#start-btn { background: #ff4f8b; color: #fff; }
+#start-btn:hover { background: #ff2a73; }
+.choice-buttons button:first-child { background: #7bd389; color: #fff; }
+.choice-buttons button:last-child  { background: #d38989; color: #fff; }
+#back-btn { background: #ffa857; color: #fff; }
+#back-btn:hover { background: #ff9230; }
+/* Notecard stack */
+.book-container { position: relative; display: inline-block; width: 80%; max-width: var(--card-max); padding: 30px 0; text-align: center; }
+#notecard-stack { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; z-index: 0; }
+#notecard-stack img.notecard { position: absolute; width: 100%; max-width: var(--card-max); height: auto; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); transform-origin: center; opacity: 0.95; transition: transform 400ms ease, opacity 300ms ease; z-index: 0; }
+#main-card { position: relative; width: 100%; max-width: var(--card-max); height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.18); z-index: 10; cursor: pointer; user-select: none; transition: transform 420ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease; display: block; background: white; }
+.swipe-left { transform: translateX(-120%) rotate(-12deg) scale(0.95); opacity: 0; }
+.swipe-right { transform: translateX(120%) rotate(12deg) scale(0.95); opacity: 0; }
+#main-card:hover { transform: translateY(-6px); }
+.nav-buttons { margin-top: 18px; display: flex; gap: 10px; }
+.nav-buttons button { background: #ffb5c2; color: #3a3a3a; border-radius: 10px; padding: 8px 16px; cursor: pointer; }
+.nav-buttons button:hover { background: #ff8fa3; }
+/* Present + balloons */
+#present-container { position: absolute; bottom: 240px; left: 20%; width: 150px; height: 150px; cursor: pointer; z-index: 12; }
+#present-lid { width: 100%; height: 50%; background: #ff4f8b; border-top-left-radius:12px; border-top-right-radius:12px; transition: transform 0.5s ease; }
+#present-body { width: 100%; height: 50%; background: #ff77aa; border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
+.balloon { position: absolute; bottom: 0; width: 30px; height: 40px; border-radius: 50%; opacity: 0.9; animation: floatUp 3s forwards; }
+@keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-300px) scale(1.2); opacity: 0; } }
+/* Envelope & Letter hover */
+#campbell-letter, #lauren-letter, #chelsea-letter, #warkentin-letter, #blendheim-letter, #kim-letter, #lee-letter, #sean-letter { transition: transform 0.3s ease; cursor:pointer; z-index:61; }
+#envelope-container { z-index:60; }
+#blueletter-container { z-index:61; }
+#greenletter-container { z-index:61; }
+#brownletter-container { z-index:61; }
+#lightbrownletter-container { z-index:61; }
+#lightgreenletter-container { z-index:61; }
+#redletter-container { z-index:61; }
+#pinkenvelope-container { z-index:61; }
+#music-cd { z-index:50; }
+</style>
+</head>
+<body>
+
+<!-- Landing -->
+<div id="landing" class="page-screen">
+  <h1>Happy Birthday, Subeen! ૮ ˶ᵔ ᵕ ᵔ˶ ა</h1>
+  <p class="subtext">click the next button</p>
+  <button id="start-btn">Nextt 𐙚 ‧₊˚ ⋅</button>
+</div>
+
+<!-- Cover choice -->
+<div id="cover-choice" class="page-screen hidden">
+  <img src="images/cover.png" class="cover-img" alt="cover">
+  <p class="subtext">Do you want to open it? ლ(́◉◞౪◟◉‵ლ</p>
+  <div class="choice-buttons">
+    <button id="yes-btn">YES</button>
+    <button id="no-btn">no thx</button>
+  </div>
+</div>
+
+<!-- Funny slide -->
+<div id="funny-slide" class="page-screen hidden">
+  <h2>(┛◉Д◉)┛彡┻━┻</h2>
+  <button id="back-to-choice">go back</button>
+</div>
+
+<!-- Scrapbook -->
+<div id="scrapbook" class="page-screen hidden">
+  <div class="book-container">
+    <div id="notecard-stack" aria-hidden="true">
+      <img class="notecard" src="images/notecard.png" alt="">
+      <img class="notecard" src="images/notecard.png" alt="">
+      <img class="notecard" src="images/notecard.png" alt="">
+    </div>
+    <div class="card-wrapper" style="position: relative; display: inline-block;">
+      <img id="main-card" src="images/cover.png" alt="current page">
+      <img id="music-cd" src="images/cdplayer.png" alt="Play Music" style="position: absolute; width: 120px; height: 120px; bottom: 20px; right: 20px; display: none;">
+    </div>
+
+    <!-- Existing envelopes/pages here -->
+    <!-- Page 5 envelope -->
+    <div id="envelope-container" style="position:absolute; bottom:200px; left:60%; transform:translateX(-50%); cursor:pointer; display:none;">
+      <img id="envelope" src="images/envelope.png" alt="envelope" style="width:150px; height:auto;">
+      <img id="campbell-letter" src="images/campbell.png" alt="letter" style="width:180px; height:auto; display:none;">
+    </div>
+    <!-- Page 7 blueletter -->
+    <div id="blueletter-container" style="position:absolute; bottom:200px; right:20%; cursor:pointer; display:none;">
+      <img id="blueletter" src="images/blueletter.png" alt="blue letter" style="width:240px; height:auto;">
+      <img id="lauren-letter" src="images/lauren.png" alt="lauren letter" style="width:280px; height:auto; display:none;">
+    </div>
+    <!-- Page 8 green envelope -->
+    <div id="greenletter-container" style="position:absolute; bottom:150px; left:45%; cursor:pointer; display:none;">
+      <img id="green-envelope" src="images/greenenvelope.png" alt="green envelope" style="width:220px; height:auto;">
+      <img id="chelsea-letter" src="images/chelsea.png" alt="chelsea letter" style="width:260px; height:auto; display:none;">
+    </div>
+    <!-- Page 9 brown envelope -->
+    <div id="brownletter-container" style="position:absolute; bottom:200px; left:10%; cursor:pointer; display:none;">
+      <img id="brown-envelope" src="images/brownenvelope.png" alt="brown envelope" style="width:220px; height:auto;">
+      <img id="warkentin-letter" src="images/warkentin.png" alt="warkentin letter" style="width:260px; height:auto; display:none;">
+    </div>
+    <!-- Page 11 light brown envelope -->
+    <div id="lightbrownletter-container" style="position:absolute; bottom:400px; left:60%; cursor:pointer; display:none;">
+      <img id="lightbrown-envelope" src="images/lightbrownenvelope.png" alt="light brown envelope" style="width:220px; height:auto;">
+      <img id="blendheim-letter" src="images/blendheim.png" alt="blendheim letter" style="width:260px; height:auto; display:none;">
+    </div>
+
+    <!-- Page 13 new envelopes -->
+    <div id="lightgreenletter-container" style="position:absolute; bottom:200px; left:15%; cursor:pointer; display:none;">
+      <img id="lightgreen-envelope" src="images/lightgreenenvelope.png" alt="light green envelope" style="width:220px; height:auto;">
+      <img id="kim-letter" src="images/kim.png" alt="kim letter" style="width:260px; height:auto; display:none;">
+    </div>
+    <div id="redletter-container" style="position:absolute; bottom:200px; left:60%; cursor:pointer; display:none;">
+      <img id="red-envelope" src="images/redenvelope.png" alt="red envelope" style="width:220px; height:auto;">
+      <img id="lee-letter" src="images/lee.png" alt="lee letter" style="width:260px; height:auto; display:none;">
+    </div>
+
+    <!-- Page 14 pink envelope -->
+    <div id="pinkenvelope-container" style="position:absolute; bottom:250px; left:10%; transform:translateX(-50%); cursor:pointer; display:none;">
+      <img id="pinkenvelope" src="images/pinkenvelope.png" alt="pink envelope" style="width:220px; height:auto;">
+      <img id="sean-letter" src="images/sean.png" alt="sean letter" style="width:260px; height:auto; display:none;">
+    </div>
+
+      <!-- Page 15 purple envelope -->
+    <div id="purpleenvelope-container" style="position:absolute; bottom:120px; left:45%; cursor:pointer; display:none; z-index:20;">
+  <img id="purpleenvelope" src="images/purpleenvelope.png" alt="purple envelope" style="width:220px; height:auto; z-index:20;">
+  <img id="stella-letter" src="images/stella.png" alt="stella letter" style="width:260px; height:auto; display:none; z-index:21;">
+  </div>
+
+    <!-- Present -->
+    <div id="present-container" class="hidden">
+      <div id="present-lid"></div>
+      <div id="present-body"></div>
+    </div>
+    <div class="nav-buttons">
+      <button id="prev-card">Back</button>
+      <button id="next-card">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audio -->
+<audio id="bg-music" loop>
+  <source src="music/daydream.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const landing=document.getElementById('landing');
+const coverChoice=document.getElementById('cover-choice');
+const funnySlide=document.getElementById('funny-slide');
+const scrapbook=document.getElementById('scrapbook');
+const startBtn=document.getElementById('start-btn');
+const yesBtn=document.getElementById('yes-btn');
+const noBtn=document.getElementById('no-btn');
+const backToChoice=document.getElementById('back-to-choice');
+const mainCard=document.getElementById('main-card');
+const prevBtn=document.getElementById('prev-card');
+const nextBtn=document.getElementById('next-card');
+const presentContainer=document.getElementById('present-container');
+const presentLid=document.getElementById('present-lid');
+const cdPlayer=document.getElementById('music-cd');
+const bgMusic=document.getElementById('bg-music');
+
+// Pages array
+let pageIndex=0;
+const pages=[
+  'images/cover.png','images/firstpage.png','images/secondpage.png','images/thirdpage.png',
+  'images/fourthpage.png','images/fifthpage.png','images/sixthpage.png','images/seventhpage.png',
+  'images/eighthpage.png','images/ninethpage.png','images/tenthpage.png','images/eleventhpage.png',
+  'images/twelthpage.png','images/13page.png','images/14page.png','images/15page.png'
+];
+
+// Envelope elements
+const envelopeContainer=document.getElementById('envelope-container');
+const envelope=document.getElementById('envelope');
+const campbell=document.getElementById('campbell-letter');
+
+const blueletterContainer=document.getElementById('blueletter-container');
+const blueletter=document.getElementById('blueletter');
+const laurenLetter=document.getElementById('lauren-letter');
+
+const greenletterContainer=document.getElementById('greenletter-container');
+const greenEnvelope=document.getElementById('green-envelope');
+const chelseaLetter=document.getElementById('chelsea-letter');
+
+const brownletterContainer=document.getElementById('brownletter-container');
+const brownEnvelope=document.getElementById('brown-envelope');
+const warkentinLetter=document.getElementById('warkentin-letter');
+
+const lightbrownletterContainer=document.getElementById('lightbrownletter-container');
+const lightbrownEnvelope=document.getElementById('lightbrown-envelope');
+const blendheimLetter=document.getElementById('blendheim-letter');
+
+const lightgreenletterContainer=document.getElementById('lightgreenletter-container');
+const lightgreenEnvelope=document.getElementById('lightgreen-envelope');
+const kimLetter=document.getElementById('kim-letter');
+
+const redletterContainer=document.getElementById('redletter-container');
+const redEnvelope=document.getElementById('red-envelope');
+const leeLetter=document.getElementById('lee-letter');
+
+const pinkenvelopeContainer = document.getElementById('pinkenvelope-container');
+const pinkenvelope = document.getElementById('pinkenvelope');
+const seanLetter = document.getElementById('sean-letter');
+
+const purpleenvelopeContainer = document.getElementById('purpleenvelope-container');
+const purpleenvelope = document.getElementById('purpleenvelope');
+const stellaLetter = document.getElementById('stella-letter');
+
+let isAnimating=false;
+let musicPlaying=false;
+
+// ---------- Screens ----------
+function showLanding(){ landing.classList.remove('hidden'); coverChoice.classList.add('hidden'); scrapbook.classList.add('hidden'); funnySlide.classList.add('hidden'); }
+function showCoverChoice(){ landing.classList.add('hidden'); coverChoice.classList.remove('hidden'); scrapbook.classList.add('hidden'); funnySlide.classList.add('hidden'); }
+function showScrapbook(){ landing.classList.add('hidden'); coverChoice.classList.add('hidden'); scrapbook.classList.remove('hidden'); funnySlide.classList.add('hidden'); }
+function showFunny(){ landing.classList.add('hidden'); coverChoice.classList.add('hidden'); scrapbook.classList.add('hidden'); funnySlide.classList.remove('hidden'); }
+
+// ---------- Update main card ----------
+function updateMainCard(){
+  mainCard.src=pages[pageIndex];
+
+  presentContainer.style.display=(pageIndex===2)?'block':'none';
+  cdPlayer.style.display=(pageIndex===3)?'block':'none';
+  if(pageIndex!==3&&musicPlaying){ bgMusic.pause(); musicPlaying=false; }
+
+  envelopeContainer.style.display=(pageIndex===5)?'block':'none';
+  if(pageIndex===5){ envelope.style.display='block'; campbell.style.display='none'; }
+
+  blueletterContainer.style.display=(pageIndex===7)?'block':'none';
+  if(pageIndex===7){ blueletter.style.display='block'; laurenLetter.style.display='none'; }
+
+  greenletterContainer.style.display=(pageIndex===8)?'block':'none';
+  if(pageIndex===8){ greenEnvelope.style.display='block'; chelseaLetter.style.display='none'; }
+
+  brownletterContainer.style.display=(pageIndex===9)?'block':'none';
+  if(pageIndex===9){ brownEnvelope.style.display='block'; warkentinLetter.style.display='none'; }
+
+  lightbrownletterContainer.style.display=(pageIndex===11)?'block':'none';
+  if(pageIndex===11){ lightbrownEnvelope.style.display='block'; blendheimLetter.style.display='none'; }
+
+  lightgreenletterContainer.style.display=(pageIndex===13)?'block':'none';
+  redletterContainer.style.display=(pageIndex===13)?'block':'none';
+  if(pageIndex===13){
+    lightgreenEnvelope.style.display='block';
+    kimLetter.style.display='none';
+    redEnvelope.style.display='block';
+    leeLetter.style.display='none';
+  }
+
+  pinkenvelopeContainer.style.display=(pageIndex===14)?'block':'none';
+  if(pageIndex===14){
+    pinkenvelope.style.display='block';
+    seanLetter.style.display='none';
+  }
+
+  purpleenvelopeContainer.style.display=(pageIndex===15)?'block':'none';
+  if(pageIndex===15){
+    purpleenvelope.style.display='block';
+    stellaLetter.style.display='none';
+  }
+}
+
+// ---------- Page flip ----------
+function goToIndex(newIndex){
+  if(isAnimating||newIndex<0||newIndex>=pages.length||newIndex===pageIndex) return;
+  isAnimating=true;
+  const direction=newIndex>pageIndex?'left':'right';
+  const outClass=direction==='left'?'swipe-left':'swipe-right';
+  mainCard.classList.add(outClass);
+  setTimeout(()=>{
+    mainCard.classList.remove(outClass);
+    pageIndex=newIndex;
+    updateMainCard();
+    mainCard.style.transform='scale(0.98) translateY(-6px)';
+    mainCard.style.opacity='0';
+    requestAnimationFrame(()=>{
+      mainCard.style.transition='transform 300ms ease, opacity 300ms ease';
+      mainCard.style.transform='translateY(0) scale(1)';
+      mainCard.style.opacity='1';
+    });
+    setTimeout(()=>{ mainCard.style.transition=''; mainCard.style.transform=''; mainCard.style.opacity=''; isAnimating=false; },350);
+  },420);
+}
+
+// ---------- Buttons ----------
+startBtn.addEventListener('click',showCoverChoice);
+yesBtn.addEventListener('click',()=>{ pageIndex=0; updateMainCard(); showScrapbook(); });
+noBtn.addEventListener('click',showFunny);
+backToChoice.addEventListener('click',showCoverChoice);
+mainCard.addEventListener('click',()=>{ if(pageIndex<pages.length-1) goToIndex(pageIndex+1); });
+prevBtn.addEventListener('click',()=>{ if(pageIndex>0) goToIndex(pageIndex-1); });
+nextBtn.addEventListener('click',()=>{ if(pageIndex<pages.length-1) goToIndex(pageIndex+1); });
+
+// ---------- Interactions ----------
+presentContainer.addEventListener('click',()=>{
+  presentLid.style.transform='rotateX(-120deg) translateY(-25%)';
+  for(let i=0;i<6;i++){ const balloon=document.createElement('div'); balloon.classList.add('balloon'); balloon.style.left=`${Math.random()*120}px`; balloon.style.background=`hsl(${Math.random()*360},70%,60%)`; presentContainer.appendChild(balloon); balloon.addEventListener('animationend',()=>balloon.remove()); }
+});
+cdPlayer.addEventListener('click',()=>{ if(bgMusic.paused){ bgMusic.play(); musicPlaying=true; } else{ bgMusic.pause(); musicPlaying=false; } });
+
+// Page 5
+envelope.addEventListener('click',()=>{ envelope.style.display='none'; campbell.style.display='block'; });
+campbell.addEventListener('mouseenter',()=>{ campbell.style.transform='scale(1.8) translateY(-10px)'; });
+campbell.addEventListener('mouseleave',()=>{ campbell.style.transform='scale(1) translateY(0)'; });
+
+// Page 7
+blueletter.addEventListener('click',()=>{ blueletter.style.display='none'; laurenLetter.style.display='block'; laurenLetter.style.transform='scale(1.2)'; });
+laurenLetter.addEventListener('mouseenter',()=>{ laurenLetter.style.transform='scale(1.8) translateY(-10px)'; });
+laurenLetter.addEventListener('mouseleave',()=>{ laurenLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 8
+greenEnvelope.addEventListener('click',()=>{ greenEnvelope.style.display='none'; chelseaLetter.style.display='block'; chelseaLetter.style.transform='scale(1.2)'; });
+chelseaLetter.addEventListener('mouseenter',()=>{ chelseaLetter.style.transform='scale(1.8) translateY(-10px)'; });
+chelseaLetter.addEventListener('mouseleave',()=>{ chelseaLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 9
+brownEnvelope.addEventListener('click',()=>{ brownEnvelope.style.display='none'; warkentinLetter.style.display='block'; warkentinLetter.style.transform='scale(1.2)'; });
+warkentinLetter.addEventListener('mouseenter',()=>{ warkentinLetter.style.transform='scale(1.8) translateY(-10px)'; });
+warkentinLetter.addEventListener('mouseleave',()=>{ warkentinLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 11
+lightbrownEnvelope.addEventListener('click',()=>{
+  lightbrownEnvelope.style.display='none';
+  blendheimLetter.style.display='block';
+  blendheimLetter.style.transform='scale(1.2)';
+});
+blendheimLetter.addEventListener('mouseenter',()=>{ blendheimLetter.style.transform='scale(1.8) translateY(-10px)'; });
+blendheimLetter.addEventListener('mouseleave',()=>{ blendheimLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 13 - new envelopes
+lightgreenEnvelope.addEventListener('click',()=>{
+  lightgreenEnvelope.style.display='none';
+  kimLetter.style.display='block';
+  kimLetter.style.transform='scale(1.2)';
+});
+kimLetter.addEventListener('mouseenter',()=>{ kimLetter.style.transform='scale(1.8) translateY(-10px)'; });
+kimLetter.addEventListener('mouseleave',()=>{ kimLetter.style.transform='scale(1.2) translateY(0)'; });
+
+redEnvelope.addEventListener('click',()=>{
+  redEnvelope.style.display='none';
+  leeLetter.style.display='block';
+  leeLetter.style.transform='scale(1.2)';
+});
+leeLetter.addEventListener('mouseenter',()=>{ leeLetter.style.transform='scale(1.8) translateY(-10px)'; });
+leeLetter.addEventListener('mouseleave',()=>{ leeLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 14 - pink envelope
+pinkenvelope.addEventListener('click',()=>{
+  pinkenvelope.style.display='none';
+  seanLetter.style.display='block';
+  seanLetter.style.transform='scale(1.2)';
+});
+seanLetter.addEventListener('mouseenter',()=>{ seanLetter.style.transform='scale(1.8) translateY(-10px)'; });
+seanLetter.addEventListener('mouseleave',()=>{ seanLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Page 15 - purple envelope
+purpleenvelope.addEventListener('click',()=>{
+  purpleenvelope.style.display='none';
+  stellaLetter.style.display='block';
+  stellaLetter.style.transform='scale(1.2)';
+});
+stellaLetter.addEventListener('mouseenter',()=>{ stellaLetter.style.transform='scale(1.8) translateY(-10px)'; });
+stellaLetter.addEventListener('mouseleave',()=>{ stellaLetter.style.transform='scale(1.2) translateY(0)'; });
+
+// Init
+showLanding();
+</script>
+</body>
+</html>
